@@ -1,0 +1,10 @@
+import { evaluateGiveaway } from '../src/rules.js';
+const items=[
+{name:'مثال مؤهل — Hardware Global',worldwide:true,campaignUrl:'https://example.com/campaign',officialSourceUrl:'https://example.com/terms',officialSourceVerified:true,endDate:'2099-12-31'},
+{name:'مثال دفع يمنح فرصا إضافية',worldwide:true,paidAdvantage:true,campaignUrl:'https://example.com/paid',officialSourceUrl:'https://example.com/paid/terms',officialSourceVerified:true,endDate:'2099-12-31'},
+{name:'مثال حظر إقليمي',worldwide:true,regionHardLock:true,campaignUrl:'https://example.com/region',officialSourceUrl:'https://example.com/region/terms',officialSourceVerified:true,endDate:'2099-12-31'},
+{name:'مثال يحتاج مصدرا رسميا',worldwide:true,campaignUrl:'https://aggregator.example/lead',officialSourceUrl:'',officialSourceVerified:false,endDate:'2099-12-31'}];
+let evaluated=items.map(x=>({...x,result:evaluateGiveaway(x)}));
+const labels={QUALIFIED:'مؤهلة',MANUAL_REVIEW:'قيد التحقق',REJECTED_SHARIAH_VIOLATION:'مرفوض شرعيا',REGION_INELIGIBLE:'مرفوض جغرافيا',REJECTED_CONTENT:'مرفوض محتوى'};
+function render(filter='ALL'){const counts={};evaluated.forEach(x=>counts[x.result.decision]=(counts[x.result.decision]||0)+1);document.querySelector('#stats').innerHTML=['QUALIFIED','MANUAL_REVIEW','REJECTED_SHARIAH_VIOLATION','REGION_INELIGIBLE'].map(k=>`<div class="card"><small>${labels[k]}</small><b>${counts[k]||0}</b><small>${k}</small></div>`).join('');document.querySelector('#list').innerHTML=evaluated.filter(x=>filter==='ALL'||x.result.decision===filter).map(x=>`<article class="row"><strong>${x.name}</strong><span class="status">${x.result.decision}</span><span class="reason">${x.result.code}</span></article>`).join('')||'<div class="row">لا توجد نتائج في هذا التصنيف.</div>'}
+document.querySelector('#filter').addEventListener('change',e=>render(e.target.value));document.querySelector('#demo').addEventListener('click',()=>{evaluated=items.map(x=>({...x,result:evaluateGiveaway(x)}));render(document.querySelector('#filter').value)});render();
